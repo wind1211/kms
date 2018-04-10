@@ -1,0 +1,77 @@
+!PATROLV3.6.00i 2407109D19B12EE06BB12C07D7CFFDC4
+!#MSG_DOMAIN	km_sec
+!++
+!
+! PATROL Session Knowledge Module
+!
+!--
+
+
+VERSION 1.5
+
+APPLICATIONS = { 
+  { NAME = "APP_PORT",
+	ACTIVE = True,
+	SECURITY = False,
+	PROPAGATE_STATE = True,
+	CREATE_ICON = False,
+	SUSPEND_GLOBAL_PARAMS = False,
+	DISCOVERY_TIME = 0,
+	DISCOVERY = PSL,
+	DISCOVERY_TEXT =  1477019593 "Dir=\"/patrol/Patrol3/PPM/Conf/\";\
+PortFile=\"portList.txt\";\
+\
+while (true)\
+{\
+    if(!exists(\"/APP_PORT_MONITOR/APP_PORT_MONITOR\")){\
+        sleep(5);\
+    }\
+    else{\
+	last;\
+    }\
+}\
+\
+FileRead=cat(Dir.PortFile);\
+#print(\"FileRead:\".FileRead);\
+\
+foreach Rline (FileRead) {\
+    HostIp=ntharg(Rline,1,\",\");\
+    HostPort=ntharg(Rline,2,\",\");\
+    Mpro=ntharg(Rline,3,\",\");\
+    HostIpTmp=replace(HostIp,\".\",\"_\");\
+    print(\"HostIpTmp:\".HostIpTmp,\"\\n\");\
+    InstanceName=HostIp.\"_\".HostPort;\
+    print(\"InstanceName:\".InstanceName,\"\\n\");\
+    if(!exists(\"/APP_PORT/\".InstanceName))\
+    {\
+	create(\"/APP_PORT/\".InstanceName,InstanceName,\"OK\",\"IP\".HostIp.\"Port:\".HostPort.\"protocol\".Mpro,\"/APP_PORT_MONITOR/APP_PORT_MONITOR\");\
+    }\
+    \
+    #print(\"HostIp:\".HostIp,\"\\n\");\
+    #print(\"HostPort:\".HostPort,\"\\n\");\
+    #print(\"Mpro:\".Mpro,\"\\n\");\
+}",
+	PARAMETERS = {
+		{	NAME = "PortConnectedStatus", PARAM_TYPE = CONSUMER, ACTIVE = True, MONITOR = True, CHECK = False,
+				BASE_COMMAND = { 
+				{ COMPUTER_TYPE = "ALL_COMPUTERS", COMMAND_TYPE = "OS",
+				  COMMAND_TEXT =  1488526987 "exit;"}
+				},
+			TITLE = "the port connected status", UNITS = "Nums",
+			HISTORY_TIME = "600", HISTORY_SPAN = 0, HISTORY_LEVEL = False,
+			FORMAT = "%f", OUTPUT = OUTPUT_GRAPH,
+			AUTO_RESCALE = True, Y_AXIS_MIN = 0, Y_AXIS_MAX = 100,
+			RANGES = {
+			  { NAME = "BORDER", ACTIVE = False, MINIMUM = 0, MAXIMUM = 100, STATE = OK, ALARM_WHEN = ALARM_INSTANT, ALARM_WHEN_N = 0
+			  },
+			  { NAME = "ALARM1", ACTIVE = True, MINIMUM = 1, MAXIMUM = 1, STATE = ALARM, ALARM_WHEN = ALARM_INSTANT, ALARM_WHEN_N = 0
+			  },
+			  { NAME = "ALARM2", ACTIVE = False, MINIMUM = 100, MAXIMUM = 100, STATE = OK, ALARM_WHEN = ALARM_INSTANT, ALARM_WHEN_N = 0
+			  }
+			}
+		}
+
+	}
+  }
+}
+!61455

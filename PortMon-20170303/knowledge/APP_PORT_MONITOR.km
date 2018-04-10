@@ -1,0 +1,110 @@
+!PATROLV3.6.00i 2407109D19B12EE06BB12C07D7CFFDC4
+!#MSG_DOMAIN	km_sec
+!++
+!
+! PATROL Session Knowledge Module
+!
+!--
+
+
+VERSION 1.16
+
+APPLICATIONS = { 
+  { NAME = "APP_PORT_MONITOR",
+	ACTIVE = True,
+	SECURITY = False,
+	PROPAGATE_STATE = True,
+	CREATE_ICON = False,
+	SUSPEND_GLOBAL_PARAMS = False,
+	DISCOVERY_TIME = 0,
+	DISCOVERY = PSL,
+	DISCOVERY_TEXT =  1476343006 "if(!exists(\"/APP_PORT_MONITOR/APP_PORT_MONITOR\")){\
+	create(\"/APP_PORT_MONITOR/APP_PORT_MONITOR\",\"APP_PORT_MONITOR\",\"OK\");\
+}",
+	PARAMETERS = {
+		{	NAME = "PORT_COLL", PARAM_TYPE = COLLECTOR, ACTIVE = True, MONITOR = False, CHECK = False,
+				BASE_COMMAND = { 
+				{ COMPUTER_TYPE = "ALL_COMPUTERS", COMMAND_TYPE = "PSL",
+				  COMMAND_TEXT =  1488527095 "Dir=\"/patrol/Patrol3/PPM/Conf/\";\
+PortFile=\"portList.txt\";\
+CmdDir=\"/patrol/Patrol3/bin/\";\
+CmdFile=\"connect\";\
+\
+while (true)\
+{\
+    if(!exists(\"/APP_PORT_MONITOR/APP_PORT_MONITOR\")){\
+        sleep(5);\
+    }\
+    else{\
+	last;\
+    }\
+}\
+\
+FileRead=cat(Dir.PortFile);\
+#print(\"FileRead:\".FileRead);\
+\
+#get the instances name \
+InstanceList=get(\"/APP_PORT/instances\");\
+\
+foreach Rline (FileRead) {\
+    HostIp=ntharg(Rline,1,\",\");\
+    HostPort=ntharg(Rline,2,\",\");\
+    Mpro=ntharg(Rline,3,\",\");\
+    \
+    #print(\"HostIp:\".HostIp,\"\\n\");\
+    #print(\"HostPort:\".HostPort,\"\\n\");\
+    #print(\"Mpro:\".Mpro,\"\\n\");\
+    \
+    CmdStr=CmdDir.CmdFile.\" -h \".HostIp.\" -p \".HostPort.\" -m \".Mpro;\
+    #print(\"CmdStr:\".CmdStr);\
+    CmdResult=execute(\"OS\",CmdStr);\
+    #print(\"CmdResult:\".CmdResult);\
+\
+    ConnectResult1=\"Successed\";\
+    ConnectResult2=\"Failed\";\
+    ConnectResult=ntharg(CmdResult,1);\
+    PortInstanceName=HostIp.\"_\".HostPort;\
+    if(strcasecmp(ConnectResult,ConnectResult1)==0)\
+    {\
+	print(\"connect successed\\n\");\
+	foreach elemt (InstanceList) {\
+		if(strcasecmp(PortInstanceName,elemt)==0)\
+		{\
+			print(\"elemt:\".elemt,\"\\n\");\
+			print(\"successed same instancename\\n\");\
+			set(\"/APP_PORT/\".elemt.\"/PortConnectedStatus/value\", 1);\
+			last;\
+		}\
+	}\
+        #set(\"/APP_PORT/PortInstanceName/PortConnectedStatus/value\", 1);\
+    }\
+    elsif(strcasecmp(ConnectResult,ConnectResult2)==0)\
+    {\
+	print(\"connect failed\\n\");\
+	foreach elemt (InstanceList) {\
+		#print(\"elemt:\".elemt,\"\\n\");\
+		if(strcasecmp(PortInstanceName,elemt)==0)\
+		{\
+			print(\"elemt:\".elemt,\"\\n\");\
+			print(\"same instance name failed\\n\");\
+			set(\"/APP_PORT/\".elemt.\"/PortConnectedStatus/value\", 0);\
+			last;\
+		}\
+	}\
+	#set(\"/APP_PORT/PortInstanceName/PortConnectedStatus/value\", 0);\
+    }\
+    else\
+    {\
+    	print(\"error!!\\n\");\
+	#set(\"/APP_PORT/PortInstanceName/PortConnectedStatus/value\", 0);\
+    }\
+}"}
+				},
+			START = "ASAP",
+			POLL_TIME = "120", EXTERNAL_POLLING = False
+		}
+
+	}
+  }
+}
+!20304

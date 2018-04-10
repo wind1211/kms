@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<KMFile majorVersion="1" minorVersion="16" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="KMFile.xsd">
+
+  <Applications>
+    <Application active="true" category="" createIcon="false" discovery="PSL" discoveryTime="0" displayName="" name="APP_PORT_MONITOR" propagateState="true" security="false" suspendGlobalParams="false" type="">
+      <DiscoveryText serial="1476343006">if(!exists("/APP_PORT_MONITOR/APP_PORT_MONITOR")){
+	create("/APP_PORT_MONITOR/APP_PORT_MONITOR","APP_PORT_MONITOR","OK");
+}</DiscoveryText>
+      <Parameters>
+        <Parameter active="true" check="false" externalPolling="false" monitor="false" name="PORT_COLL" pollTime="120" start="ASAP" type="COLLECTOR">
+          <ParamMetadata applicationCollectionStatus="false" availability="false" config="false" delta="false" graphByDefault="false" kpi="false" monitorForAbnormalities="false" normalDistribution="false" responseTime="false" statistical="false"/>
+          <BaseCommand>
+            <Command commandType="PSL" computerType="ALL_COMPUTERS">
+              <Commandtext serial="1488527095">Dir="/patrol/Patrol3/PPM/Conf/";
+PortFile="portList.txt";
+CmdDir="/patrol/Patrol3/bin/";
+CmdFile="connect";
+
+while (true)
+{
+    if(!exists("/APP_PORT_MONITOR/APP_PORT_MONITOR")){
+        sleep(5);
+    }
+    else{
+	last;
+    }
+}
+
+FileRead=cat(Dir.PortFile);
+#print("FileRead:".FileRead);
+
+#get the instances name 
+InstanceList=get("/APP_PORT/instances");
+
+foreach Rline (FileRead) {
+    HostIp=ntharg(Rline,1,",");
+    HostPort=ntharg(Rline,2,",");
+    Mpro=ntharg(Rline,3,",");
+    
+    #print("HostIp:".HostIp,"\n");
+    #print("HostPort:".HostPort,"\n");
+    #print("Mpro:".Mpro,"\n");
+    
+    CmdStr=CmdDir.CmdFile." -h ".HostIp." -p ".HostPort." -m ".Mpro;
+    #print("CmdStr:".CmdStr);
+    CmdResult=execute("OS",CmdStr);
+    #print("CmdResult:".CmdResult);
+
+    ConnectResult1="Successed";
+    ConnectResult2="Failed";
+    ConnectResult=ntharg(CmdResult,1);
+    PortInstanceName=HostIp."_".HostPort;
+    if(strcasecmp(ConnectResult,ConnectResult1)==0)
+    {
+	print("connect successed\n");
+	foreach elemt (InstanceList) {
+		if(strcasecmp(PortInstanceName,elemt)==0)
+		{
+			print("elemt:".elemt,"\n");
+			print("successed same instancename\n");
+			set("/APP_PORT/".elemt."/PortConnectedStatus/value", 1);
+			last;
+		}
+	}
+        #set("/APP_PORT/PortInstanceName/PortConnectedStatus/value", 1);
+    }
+    elsif(strcasecmp(ConnectResult,ConnectResult2)==0)
+    {
+	print("connect failed\n");
+	foreach elemt (InstanceList) {
+		#print("elemt:".elemt,"\n");
+		if(strcasecmp(PortInstanceName,elemt)==0)
+		{
+			print("elemt:".elemt,"\n");
+			print("same instance name failed\n");
+			set("/APP_PORT/".elemt."/PortConnectedStatus/value", 0);
+			last;
+		}
+	}
+	#set("/APP_PORT/PortInstanceName/PortConnectedStatus/value", 0);
+    }
+    else
+    {
+    	print("error!!\n");
+	#set("/APP_PORT/PortInstanceName/PortConnectedStatus/value", 0);
+    }
+}</Commandtext>
+            </Command>
+          </BaseCommand>
+        </Parameter>
+      </Parameters>
+    </Application>
+  </Applications>
+
+</KMFile>

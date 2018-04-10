@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<KMFile majorVersion="1" minorVersion="5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="KMFile.xsd">
+
+  <Applications>
+    <Application active="true" category="" createIcon="false" discovery="PSL" discoveryTime="0" displayName="" name="APP_PORT" propagateState="true" security="false" suspendGlobalParams="false" type="">
+      <DiscoveryText serial="1477019593">Dir="/patrol/Patrol3/PPM/Conf/";
+PortFile="portList.txt";
+
+while (true)
+{
+    if(!exists("/APP_PORT_MONITOR/APP_PORT_MONITOR")){
+        sleep(5);
+    }
+    else{
+	last;
+    }
+}
+
+FileRead=cat(Dir.PortFile);
+#print("FileRead:".FileRead);
+
+foreach Rline (FileRead) {
+    HostIp=ntharg(Rline,1,",");
+    HostPort=ntharg(Rline,2,",");
+    Mpro=ntharg(Rline,3,",");
+    HostIpTmp=replace(HostIp,".","_");
+    print("HostIpTmp:".HostIpTmp,"\n");
+    InstanceName=HostIp."_".HostPort;
+    print("InstanceName:".InstanceName,"\n");
+    if(!exists("/APP_PORT/".InstanceName))
+    {
+	create("/APP_PORT/".InstanceName,InstanceName,"OK","IP".HostIp."Port:".HostPort."protocol".Mpro,"/APP_PORT_MONITOR/APP_PORT_MONITOR");
+    }
+    
+    #print("HostIp:".HostIp,"\n");
+    #print("HostPort:".HostPort,"\n");
+    #print("Mpro:".Mpro,"\n");
+}</DiscoveryText>
+      <Parameters>
+        <Parameter active="true" autoRescale="true" check="false" format="%f" historyLevel="false" historySpan="0" historyTime="600" monitor="true" name="PortConnectedStatus" output="OUTPUT_GRAPH" title="the port connected status" type="CONSUMER" units="Nums" yAxisMax="100" yAxisMin="0">
+          <ParamMetadata applicationCollectionStatus="false" availability="false" config="false" delta="false" graphByDefault="false" kpi="false" monitorForAbnormalities="false" normalDistribution="false" responseTime="false" statistical="false"/>
+          <BaseCommand>
+            <Command commandType="OS" computerType="ALL_COMPUTERS">
+              <Commandtext serial="1488526987">exit;</Commandtext>
+            </Command>
+          </BaseCommand>
+          <Ranges>
+            <Range active="false" alarmWhen="ALARM_INSTANT" alarmWhenN="0" maximum="100" minimum="0" name="BORDER" state="OK"/>
+            <Range active="true" alarmWhen="ALARM_INSTANT" alarmWhenN="0" maximum="1" minimum="1" name="ALARM1" state="ALARM"/>
+            <Range active="false" alarmWhen="ALARM_INSTANT" alarmWhenN="0" maximum="100" minimum="100" name="ALARM2" state="OK"/>
+          </Ranges>
+        </Parameter>
+      </Parameters>
+    </Application>
+  </Applications>
+
+</KMFile>

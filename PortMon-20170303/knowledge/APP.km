@@ -1,0 +1,59 @@
+!PATROLV3.6.00i E2E35CAE97FC7959FC85D0AD645346324B910668F2690BC4F3511C09C0DCB338
+!++
+!
+! PATROL Session Knowledge Module
+!
+!--
+
+
+VERSION 1.1
+
+APPLICATIONS = { 
+  { NAME = "APP",
+	ACTIVE = True,
+	SECURITY = False,
+	PROPAGATE_STATE = True,
+	CREATE_ICON = False,
+	SUSPEND_GLOBAL_PARAMS = False,
+	DISCOVERY_TIME = 0,
+	DISCOVERY = PSL,
+	DISCOVERY_TEXT =  1476327445 "while (true)\
+{\
+if(!exists(\"/APP_TEST/APP_TEST\")){\
+ 	sleep(5);\
+}\
+else{\
+	last;\
+	}\
+}\
+ab=\"a1,a2,a3\";\
+a=replace(ab,\",\",\"\\n\");\
+foreach inst(a){\
+	if(!exists(\"/APP/\".inst)){\
+		create(\"/APP/\".inst,inst,\"OK\",\"\",\"/APP_TEST/APP_TEST\");\
+	}\
+}\
+print(get(\"/APP/instances\"));",
+	PARAMETERS = {
+		{	NAME = "Status", PARAM_TYPE = CONSUMER, ACTIVE = True, MONITOR = True, CHECK = False,
+				BASE_COMMAND = { 
+				{ COMPUTER_TYPE = "ALL_COMPUTERS", COMMAND_TYPE = "OS",
+				  COMMAND_TEXT =  1476327479 "exit;"}
+				},
+			HISTORY_TIME = "600", HISTORY_SPAN = 0, HISTORY_LEVEL = False,
+			FORMAT = "%f", OUTPUT = OUTPUT_GRAPH,
+			AUTO_RESCALE = True, Y_AXIS_MIN = 0, Y_AXIS_MAX = 100,
+			RANGES = {
+			  { NAME = "BORDER", ACTIVE = False, MINIMUM = 0, MAXIMUM = 100, STATE = OK, ALARM_WHEN = ALARM_INSTANT, ALARM_WHEN_N = 0
+			  },
+			  { NAME = "ALARM1", ACTIVE = False, MINIMUM = 0, MAXIMUM = 100, STATE = OK, ALARM_WHEN = ALARM_INSTANT, ALARM_WHEN_N = 0
+			  },
+			  { NAME = "ALARM2", ACTIVE = False, MINIMUM = 100, MAXIMUM = 100, STATE = OK, ALARM_WHEN = ALARM_INSTANT, ALARM_WHEN_N = 0
+			  }
+			}
+		}
+
+	}
+  }
+}
+!52772
